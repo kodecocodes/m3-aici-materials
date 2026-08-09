@@ -12,11 +12,11 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Run xcodebuild
         shell: bash
         run: |
           cd TokensDashboard
-          xcodebuild -project TokensDashboard.xcodeproj -scheme TokensDashboard -destination 'platform=iOS Simulator,name=iPhone 14' test
+          xcodebuild -project TokensDashboard.xcodeproj -scheme TokensDashboard -destination 'platform=iOS Simulator,name=iPhone 17' test
 
 
