@@ -2,6 +2,8 @@ name: AI Code Review
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+env:
+  CI_GUIDANCE: CI_GUIDANCE.md
 concurrency:
   group: ai-review-${{ github.event.pull_request.number }}
   cancel-in-progress: true
@@ -32,7 +34,8 @@ jobs:
         run: |
           ./.github/scripts/ai-code-review.sh "${{ github.base_ref }}" \
             --review-file review.md \
-            --otel-file "${{ runner.temp }}/copilot-otel.jsonl"
+            --otel-file "${{ runner.temp }}/copilot-otel.jsonl" \
+            --guidance "${{ env.CI_GUIDANCE }}"
       - name: Upload token log
         uses: actions/upload-artifact@v7
         if: always()

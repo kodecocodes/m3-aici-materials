@@ -2,12 +2,8 @@ name: Codex Review
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-concurrency:
-  group: codex-review-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
-permissions:
-  contents: read
-  pull-requests: write
+env:
+  CI_GUIDANCE: CI_GUIDANCE.md
 jobs:
   codex-review:
     runs-on: ubuntu-latest
@@ -18,7 +14,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Build review prompt
-        run: ./.github/scripts/build-review-prompt.sh codex "${{ github.base_ref }}" > review-prompt.txt
+        run: ./.github/scripts/build-review-prompt.sh codex "${{ github.base_ref }}" --guidance "${{ env.CI_GUIDANCE }}" > review-prompt.txt
       - name: Run Codex review
         id: codex
         uses: openai/codex-action@v1

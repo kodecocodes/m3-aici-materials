@@ -8,10 +8,18 @@ on:
       - '**/*.xcodeproj/**'
       - '**/*.xcworkspace/**'
       - 'CODE_REVIEW.md'
+      - 'CI_GUIDANCE.md'
+      - '.github/scripts/**'
       - '.github/workflows/claude-code-review.yml'
+env:
+  CI_GUIDANCE: CI_GUIDANCE.md
 concurrency:
   group: claude-review-${{ github.event.pull_request.number }}
   cancel-in-progress: true
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
 jobs:
   claude-review:
     if: github.event.pull_request.draft == false
@@ -34,7 +42,8 @@ jobs:
             ./.github/scripts/build-review-prompt.sh claude \
               "${{ github.base_ref }}" \
               "${{ github.repository }}" \
-              "${{ github.event.pull_request.number }}"
+              "${{ github.event.pull_request.number }}" \
+              --guidance "${{ env.CI_GUIDANCE }}"
             echo 'PROMPT_EOF'
           } >> "$GITHUB_OUTPUT"
       - name: Run Claude Code review

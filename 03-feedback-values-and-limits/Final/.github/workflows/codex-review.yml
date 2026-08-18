@@ -8,10 +8,17 @@ on:
       - '**/*.xcodeproj/**'
       - '**/*.xcworkspace/**'
       - 'CODE_REVIEW.md'
+      - 'CI_GUIDANCE.md'
+      - '.github/scripts/**'
       - '.github/workflows/codex-review.yml'
+env:
+  CI_GUIDANCE: CI_GUIDANCE.md
 concurrency:
   group: codex-review-${{ github.event.pull_request.number }}
   cancel-in-progress: true
+permissions:
+  contents: read
+  pull-requests: write
 jobs:
   codex-review:
     if: github.event.pull_request.draft == false
@@ -26,7 +33,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Build review prompt
-        run: ./.github/scripts/build-review-prompt.sh codex "${{ github.base_ref }}" > review-prompt.txt
+        run: ./.github/scripts/build-review-prompt.sh codex "${{ github.base_ref }}" --guidance "${{ env.CI_GUIDANCE }}" > review-prompt.txt
       - name: Run Codex review
         id: codex
         uses: openai/codex-action@v1

@@ -1,14 +1,8 @@
 name: Claude Code Review
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
-concurrency:
-  group: claude-review-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
-permissions:
-  contents: read
-  pull-requests: write
-  id-token: write
+env:
+  CI_GUIDANCE: CI_GUIDANCE.md
 jobs:
   claude-review:
     runs-on: ubuntu-latest
@@ -26,7 +20,8 @@ jobs:
             ./.github/scripts/build-review-prompt.sh claude \
               "${{ github.base_ref }}" \
               "${{ github.repository }}" \
-              "${{ github.event.pull_request.number }}"
+              "${{ github.event.pull_request.number }}" \
+              --guidance "${{ env.CI_GUIDANCE }}"
             echo 'PROMPT_EOF'
           } >> "$GITHUB_OUTPUT"
       - name: Run Claude Code review
