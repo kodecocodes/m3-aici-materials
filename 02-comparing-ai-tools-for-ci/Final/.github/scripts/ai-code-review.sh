@@ -5,12 +5,13 @@
 # Captures token usage via the Copilot OTel file exporter.
 #
 # Usage:
-#   .github/scripts/ai-code-review.sh <base-ref> [--review-file path] [--otel-file path]
+#   .github/scripts/ai-code-review.sh <base-ref> [--review-file path] [--otel-file path] [--guidance path]
 set -euo pipefail
 
 BASE_REF=""
 REVIEW_FILE="review.md"
 OTEL_FILE=""
+GUIDANCE_FILE="${CI_GUIDANCE:-}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -20,6 +21,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --otel-file)
       OTEL_FILE="$2"
+      shift 2
+      ;;
+    --guidance)
+      GUIDANCE_FILE="$2"
       shift 2
       ;;
     -h|--help)
@@ -43,7 +48,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z "$BASE_REF" ]]; then
-  echo "usage: $0 <base-ref> [--review-file path] [--otel-file path]" >&2
+  echo "usage: $0 <base-ref> [--review-file path] [--otel-file path] [--guidance path]" >&2
   exit 1
 fi
 
@@ -78,7 +83,11 @@ echo "Reviewing whole change set (${DIFF_SPEC}):"
 printf '  %s\n' $FILES
 echo
 
-PROMPT=$("$BUILD_PROMPT" copilot "$BASE_REF")
+PROMPT_ARGS=(copilot "$BASE_REF")
+if [[ -n "$GUIDANCE_FILE" ]]; then
+  PROMPT_ARGS+=(--guidance "$GUIDANCE_FILE")
+fi
+PROMPT=$("$BUILD_PROMPT" "${PROMPT_ARGS[@]}")
 
 export COPILOT_OTEL_ENABLED=true
 export COPILOT_OTEL_EXPORTER_TYPE=file
